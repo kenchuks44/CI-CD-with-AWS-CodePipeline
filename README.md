@@ -259,6 +259,222 @@ artifacts:
 
 ## Step 4: Implementing the deploy stage
 In this step, we will configure automated deployment of the reactapp application to ECS Fargate
+Firstly, we will create a load balancer which will be the entry point for the containerised application (here an application load balancer)
+
+![Screenshot (840)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/5373c57a-0c7d-47c3-b445-17eb0e6607c4)
+
+![Screenshot (841)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/b09be222-12dc-4b88-b68d-caea7483462f)
+
+![Screenshot (842)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/f15610bb-40af-4d3b-a65b-3aa28b44bffb)
+
+With an Internet Facing IPv4 For network, we select the default VPC and select all subnets in the VPC
+
+![Screenshot (843)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/433503a9-feb3-46fd-9662-f7eda31f5b65)
+
+![Screenshot (844)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/b52f81ba-00d3-43dd-a2b1-f94008cd6b18)
+
+![Screenshot (858)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/2d5f8152-d716-4e20-9dfd-5cc100aa0331)
+
+Next, we create a security group
+
+![Screenshot (845)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/eb5e0a8b-fc8e-4dd9-acea-f93ab3173f48)
+
+![Screenshot (846)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/28aa0f59-38b5-4782-b22f-6b8ea3194614)
+
+![Screenshot (846)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/9b9a7235-ba82-42d9-9a2e-d2974bb5955a)
+
+Next, we create a target group. A target group is used to route requests to one or more registered targets, such as EC2 instances, IP addresses, or Lambda functions. Target groups are essential for managing and distributing incoming traffic efficiently to ensure that applications are scalable and highly available. This target group is going to be pointing to containers running in the ECS Fargate( hence, target type of IP selected). Note that for now, no target would be registered.
+
+![Screenshot (849)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/324550d8-df41-4fa0-8628-9cd7ac947b37)
+
+![Screenshot (850)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/231485ea-5d11-43e9-9db4-4ee4df07d74d)
+
+![Screenshot (851)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/c7a01a5f-906c-456c-bd03-2d12062e1628)
+
+![Screenshot (853)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/26ab7a08-2ebd-453d-a602-7855cdba8e22)
+
+![Screenshot (852)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/5a03ef0e-4982-4418-8158-8304f02e9cd1)
+
+Next, we setup a Fargate cluster
+
+![Screenshot (854)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/cf7ec50d-240d-4651-a82a-a41d34b0d2a0)
+
+![Screenshot (854)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/990edf59-f8a2-456d-a3d8-97c9ab87fcd6)
+
+![Screenshot (856)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/61513ab2-78ab-459a-8fc3-3563364cbb03)
+
+![Screenshot (857)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/6a85eb09-4b15-4404-a266-812264ff6661)
+
+![Screenshot (859)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/11435f67-b64c-4e03-ae90-6af676f50e73)
+
+Next, we create a task and container definition.
+
+## Task definition
+A task definition is a blueprint of our application. It is a text file, in JSON format, that describes one or more containers that form your application.
+
+## Task
+A task is the instantiation of a task definition within a cluster. We have the option to specify the number of tasks that will run on your cluster.
+
+## Cluster
+A cluster is basically the logical grouping of resources that our application needs. If we use Fargate launch type with tasks within clusters, then Amazon ECS manages our cluster resources. If we use EC2 launch type, then our clusters will be a group of Amazon EC2 container instances that we manage.
+
+Before proceeding to create the task definition, we create an ECS Task Execution Role. ECS (Elastic Container Service) Task Execution Role grants the Amazon ECS container agent permissions to make API calls on our behalf. These permissions are necessary for the agent to pull container images, log data to Amazon CloudWatch, and manage other AWS services used by your ECS tasks.
+
+![Screenshot (861)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/4fb597ba-387c-491d-99fc-80f56592e003)
+
+![Screenshot (862)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/ad3a9f5d-3cd2-4c3e-b0aa-ef769d8f7696)
+
+![Screenshot (863)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/b5b3872e-65d2-4387-b927-823358b8ed77)
+
+![Screenshot (864)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/d6a8bfd5-82fd-4332-8f59-426165f5a9c6)
+
+![Screenshot (865)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/4702d78a-4cfe-4b16-bb6f-f0d570bbb41d)
+
+Now, we proceed to the task definition creation:
+
+![Screenshot (865)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/9917597b-9c73-4d8f-b202-0665542150fb)
+
+![Screenshot (866)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/d6bf83c7-e48a-4186-aa12-54d99b69582f)
+
+![Screenshot (868)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/32906e57-c88e-477d-a3b1-aaee90000071)
+
+![Screenshot (869)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/98ff2e9d-6e56-4dd8-a3ec-f9eb5171439c)
+
+![Screenshot (915)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/56a8b8d6-418c-4cad-98e3-1da9cf593e15)
+
+![Screenshot (916)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/8ce14df2-f264-40b5-be52-3be0f9492e43)
+
+Note that we can use different task definition revisions to specify different containers in Amazon ECS (Elastic Container Service). Task definitions in ECS are versioned, and each revision can define a different set of container configurations. This allows us to manage changes and updates to your application in a controlled manner.
+
+Next, we create a service. The service manages the task definitions and ensures the specified number of tasks are running and healthy. The task definition is deployed using a service.
+
+![Screenshot (872)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/7d930ae1-7316-418c-8449-85a646c0d294)
+
+![Screenshot (873)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/77dc5b40-fe6a-4bf1-8262-1827b04c4c78)
+
+![Screenshot (875)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/d36fe60d-eb92-484e-96aa-64936b0745ed)
+
+![Screenshot (876)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/1cd354e0-bccd-40c4-a1b4-fafac97fd3b2)
+
+![Screenshot (877)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/116d1284-449f-40f0-a7e6-48d207bff89f)
+
+![Screenshot (878)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/e9a569a9-99c0-46c6-b124-ce866687c57e)
+
+![Screenshot (879)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/79180ca8-c1b7-492d-8dc0-f7bb9220e4a1)
+
+![Screenshot (880)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/8eebe210-3dd7-40dc-be08-14595c62ee0f)
+
+![Screenshot (912)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/42ca022d-3ab7-4a35-aeb5-74a033d50865)
+
+![Screenshot (913)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/ab3532a5-e08d-4fd6-82d0-c2f66f91b6ec)
+
+![Screenshot (914)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/9ef05525-9cd6-400f-9cec-2c548fb64050)
+
+With the service deployed successfully and running with the latest version of the container on ECR, we now test the container application by copying the LB DNS name and accessing the application via a web browser
+
+![Screenshot (885)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/d96908c1-f6fd-41d3-a89d-b61c9a03685e)
+
+![Screenshot (886)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/c623b085-f7a2-4e07-9d6b-ff7866028928)
+
+After this manual deployment, we then add a deploy stage after the build stage to the pipeline. This will enable deployment whenever there is a commit in the CodeCommit repository.
+
+![Screenshot (889)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/97d427f4-8b29-4c2d-a050-294a43a5dde2)
+
+![Screenshot (888)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/7c39eeba-7307-4bde-ab0a-138b96850db2)
+
+![Screenshot (890)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/b7a27049-9329-4685-8c91-c3d4d0f8b2ad)
+
+We then add an action group. For Action Provider, we select Amazon ECS. For Input artifacts, we select Build Artifact (this will be the imagedefinitions.json information about the container) and for Image Definitions file, we input imagedefinitions.json. We then save and confirm.
+
+![Screenshot (894)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/f0824e18-d358-4b75-b0ef-d7b0ed39aa6a)
+
+![Screenshot (910)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/b7cc4140-677a-4cc9-b0a3-7c45c4e93561)
+
+![Screenshot (911)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/e89a5418-f6ba-4654-96f6-5700c6ed30d0)
+
+![Screenshot (895)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/e0b506dd-ff4c-4563-9380-18055993cc7e)
+
+Now, to test automation of the full deployment pipeline, we edit the Header.js by adding three dots to the end of the `h1` line text and commit the changes
+
+![Screenshot (897)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/95d14f09-fd8e-42c2-964d-a7642009f892)
+
+![Screenshot (899)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/ff5adc3d-d744-40ee-a619-fd6523c2d830)
+
+We then observe the pipeline triggered
+
+![Screenshot (900)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/2a5cda7f-ad8a-41db-a581-edf68ab5b61e)
+
+![Screenshot (902)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/d3b28353-b43c-4e51-914c-b99991236b71)
+
+![Screenshot (903)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/cbcebec4-14dd-49aa-9ac0-8b28a8dc2984)
+
+![Screenshot (904)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/d9588608-f0de-4755-acb4-64d15f60ab3f)
+
+![Screenshot (905)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/31142df0-da51-46f8-a9d6-ec8b78749064)
+
+We can see the task using the new docker image ans the task is registered in the target group.
+
+![Screenshot (906)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/6490cc39-3355-4daf-a969-26d1173853df)
+
+![Screenshot (907)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/44a92f00-5a25-4784-a9c9-4fada3a0a19b)
+
+![Screenshot (908)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/58ec6ae0-b540-4f8c-bed8-7100e3d7635d)
+
+We can as well see the artifacts stored in S3 bucket and the docker image in the container registry.
+
+![Screenshot (918)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/06989da1-837f-4f04-9e30-c1864f18fbc3)
+
+![Screenshot (919)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/ca67db67-a79f-4c75-bb3b-c4d4ed9b01af)
+
+Hence, we have a full automated deployment by CodePipeline.
+
+Congratulations!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
