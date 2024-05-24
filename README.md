@@ -6,7 +6,7 @@ The steps to accomplish this will involve implementing a full code pipeline inco
 
 Below is how the target architecture will look like
 
-![Arch6](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/817c6f36-f1d0-4ce5-8c05-a9b9a8d1f968)
+![Screenshot (920)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/76b73998-6449-4878-9d31-0dae07f34509)
 
 ## AWS CodePipeline
 AWS CodePipeline is a fully managed continuous delivery service that helps you automate your release pipeline. It allows users to build, test and deploy code into a test or production environment.
