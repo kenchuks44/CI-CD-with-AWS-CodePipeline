@@ -26,23 +26,28 @@ Amazon Elastic Container Service (ECS), also known as Amazon EC2 Container Servi
 ## AWS Fargate
 AWS Fargate is a compute engine for Amazon Elastic Container Service(ECS) that allows us to run containers without having to provision, configure & scale clusters of VMs that host container applications. AWS Fargate eliminates the need for users to manage the EC2 instances on their own.
 
-## Step 1: Setup CodeCommit Repo as well as Authentication
+## Step 1: Setup CodeCommit Repo as well as Authentication to it
 Firstly, we generate an SSH key which will be used to authenticate with CodeCommit using the command below:
+
 ```
 ssh-keygen -t rsa -b 4096 -C "<your-email.com>"
 ```
+
 Then, we copy the public key using the command below:
+
 ```
-cat ~/.ssh/id_rsa.pub
+cat /path-to-public-key/
 ```
 
-Next, we go to the `Security Credentials` tab of AWS account. Then under the AWS Codecommit section, we upload the SSH key and copy the generated SSH key ID.
-Then, from the terminal, we run `vi ~/.ssh/config` and add the following to the config file:
+Next, we go to the `Security Credentials` tab of AWS account. Then, under the AWS Codecommit section, we upload the SSH key and copy the generated SSH key ID.
+Then, from the terminal, we run `vi /path-to-config-file/` and add the following to the config file:
+
 ```
 Host git-codecommit.*.amazonaws.com
   User <SSH_KEY_ID>
   IdentityFile ~/.ssh/id_rsa
 ```
+
 ![Screenshot (766)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/b24cdcfe-f8fb-48b6-8da5-5a77043521b3)
 
 ![Screenshot (767)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/82e11ec7-2c2b-4a6b-85a9-f3aaaae18963)
@@ -68,7 +73,7 @@ Next, we create a CodeCommit repository and clone the repository. Thereafter, we
 ![Screenshot (778)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/3fbe0319-922a-4bd9-bee8-77b07bb363cc)
 
 ## Step 2: Setting up Private Repository in ECR and a CodeBuild Project
-In this step, we will configure the Elastic Container Registry and use the codebuild service to build a docker container which will be pushed into the registry. Firstly, we will create the private repo. This is the repository that codebuild will store the docker image in, created from the codecommit repo.
+In this step, we will configure the Elastic Container Registry and use the codebuild service to build a docker container which will be pushed into the registry. Firstly, we will create the private repo. This is the repository that CodeBuild will store the docker image in, created from the CodeCommit repo.
 
 ![Screenshot (779)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/0c108340-1972-44e6-a9dd-f0f27498f9a5)
 
@@ -76,14 +81,14 @@ In this step, we will configure the Elastic Container Registry and use the codeb
 
 ![Screenshot (786)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/a09f5c16-5d11-4dff-8b3d-0f7d4916b089)
 
-Next, we will configure a codebuild project which we utilize the files in the codecommit repo, build a docker image & store it within ECR in the above repository.
+Next, we will configure a CodeBuild project which we utilize the files in the CodeCommit repo, build a docker image & store it within ECR in the above repository.
 
 ![Screenshot (787)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/e502ade0-37a6-462e-82c2-6d270e2122f3)
 
 For the CodeBuild configuration:
-For Source Provider, we will select `AWS CodeCommit`. Then, for Repository, we choose the repo we created in CodeCommit. For the Branch, we will select the branch from the Branch dropdown.
+For Source Provider, we will select `AWS CodeCommit`. Then, for Repository, we select the repo we created in CodeCommit. For the Branch, we will select the branch from the Branch dropdown.
 
-For `Environment` image, we select `Managed Image`. Under Operating system, we will select Amazon Linux 2. Then, for `Runtime(s)`, we select `Standard` and under `Image` select `aws/codebuild/amazonlinux2-x86_64-standard:X.0` where X is the highest number. Under Image version, Always use the latest image for this runtime version. Next, for `Envrironment` type, select Linux. Check the Privileged box (because we're creating a docker image). For Service role, select New Service Role and leave the default suggested name.
+For `Environment` image, we select `Managed Image`. Under Operating system, we will select Amazon Linux 2. Then, for `Runtime(s)`, we select `Standard` and under `Image`, select `aws/codebuild/amazonlinux2-x86_64-standard:X.0` where X is the highest number. Under Image version, select `Always use the latest image for this runtime version`. Next, for `Envrironment` type, select Linux. Check the Privileged box (because we're creating a docker image). For Service role, select New Service Role and leave the default suggested name.
 
 ![Screenshot (788)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/47aff2fa-071b-41ee-bb2e-f9782ef3e881)
 
@@ -98,15 +103,17 @@ For `Environment` image, we select `Managed Image`. Under Operating system, we w
 ![Screenshot (793)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/bc4554b2-9e40-4011-b21b-0d7c2a4b93c6)
 
 Next, we add environmental variables
+
 ```
-AWS_DEFAULT_REGION with a value of us-east-1
-AWS_ACCOUNT_ID with a value of your account ID
-IMAGE_TAG with a value of latest
-IMAGE_REPO_NAME with a value of the name of ECR private repository created
+AWS_DEFAULT_REGION <aws_region>
+AWS_ACCOUNT_ID <account_ID>
+IMAGE_TAG <image_tag>
+IMAGE_REPO_NAME <name of ECR private repository>
 ```
+
 ![Screenshot (794)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/1eb82ba1-bf2c-429b-b877-b395d4e8c494)
 
-Next, we select the buildspec.yml file. The buildspec.yml file tells codebuild how to build your code. The steps involved, what the build needs, possible testing and what to do with the output (artifacts).
+Next, we select the buildspec.yml file. The buildspec.yml file tells CodeBuild how to build your code. The steps involved, what the build needs, possible testing and what to do with the output (artifacts).
 
 ```
 version: 0.2
@@ -136,6 +143,7 @@ Then, we create the build project.
 ![Screenshot (798)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/a207c80d-bbda-426b-baba-b1366b981332)
 
 Our build project will be accessing ECR to store the docker image to be created, and we need to ensure it has the permissons to do that. The build process will use an IAM role created by CodeBuild, so we need to update the role permissions. To do this, we go to the IAM console, click on Roles. Then, we identify the `codebuild-reactapp-pipeline-build-service-role`, click on it. Then, we click the Permissions tab and add the inline policy below:
+
 ```
 {
 	"Statement": [
@@ -182,8 +190,8 @@ We then check the private repository in ECR to see the docker image created and 
 
 ![Screenshot (809)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/39896f35-0540-4f99-93c9-66206075082c)
 
-## Step 3: Creating and Testing a CodePipeline
-In this step, we will create a CodePipeline which will utilize CodeCommit and CodeBuild to create a continous build process. The aim is that every time a new commit is made to the CodeCommit repo, a new docker image is created and pushed to ECR. For now, we will skip the CodeDeploy to be implemented later. We create the pipeline, selecting CodeCommit as the source stage and Codebuild as the build stage and follow subsequent prompts accordingly. As already mentioned, we will skip the deploy stage for now and create the pipeline. The pipeline will go through an initial execution and then completes without any issues
+## Step 3: Creating and Testing the CodePipeline
+In this step, we will create a CodePipeline which will utilize CodeCommit and CodeBuild to create a continous build process. The aim is that every time a new commit is made to the CodeCommit repo, a new docker image is created and pushed to ECR. For now, we will skip the CodeDeploy to be implemented later. We create the pipeline, selecting CodeCommit as the source stage and Codebuild as the build stage and follow subsequent prompts accordingly. As already mentioned, we will skip the deploy stage for now and create the pipeline.
 
 ![Screenshot (811)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/64d52dcb-b550-4404-8111-9547d5ba770f)
 
@@ -209,11 +217,12 @@ We then see the new image created and stored in ECR
 
 ![Screenshot (824)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/4c5d6ead-3ab2-45a1-9fd3-c333bc86dd3b)
 
-We also see the artifacts generated and stored in S3
+We also observe the artifacts generated and stored in S3
 
 ![Screenshot (826)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/a26547ab-d654-4c8a-aca6-2868254ca8e3)
 
-To observe the pipeline triggered and generate a new version of the image in ECR automatically when a commit happens, we update the buildspec.yml file as below:
+To observe the pipeline get triggered and generate a new version of the image in ECR automatically when a commit happens, we update the buildspec.yml file as below:
+
 ```
 version: 0.2
 
@@ -257,8 +266,8 @@ artifacts:
 
 ![Screenshot (837)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/de205bc1-e24a-4229-be7c-3f1b3dbaaa79)
 
-## Step 4: Implementing the deploy stage
-In this step, we will configure automated deployment of the reactapp application to ECS Fargate
+## Step 4: Implementing the Deploy stage
+In this step, we will configure automated deployment of the react nodejs application to ECS Fargate
 Firstly, we will create a load balancer which will be the entry point for the containerised application (here an application load balancer)
 
 ![Screenshot (840)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/5373c57a-0c7d-47c3-b445-17eb0e6607c4)
@@ -267,7 +276,7 @@ Firstly, we will create a load balancer which will be the entry point for the co
 
 ![Screenshot (842)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/f15610bb-40af-4d3b-a65b-3aa28b44bffb)
 
-With an Internet Facing IPv4 For network, we select the default VPC and select all subnets in the VPC
+With an Internet Facing IPv4 For network, we then select the default VPC and select all subnets in the VPC
 
 ![Screenshot (843)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/433503a9-feb3-46fd-9662-f7eda31f5b65)
 
@@ -275,7 +284,7 @@ With an Internet Facing IPv4 For network, we select the default VPC and select a
 
 ![Screenshot (858)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/2d5f8152-d716-4e20-9dfd-5cc100aa0331)
 
-Next, we create a security group
+Next, we create a Security Group
 
 ![Screenshot (845)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/eb5e0a8b-fc8e-4dd9-acea-f93ab3173f48)
 
@@ -283,7 +292,7 @@ Next, we create a security group
 
 ![Screenshot (846)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/9b9a7235-ba82-42d9-9a2e-d2974bb5955a)
 
-Next, we create a target group. A target group is used to route requests to one or more registered targets, such as EC2 instances, IP addresses, or Lambda functions. Target groups are essential for managing and distributing incoming traffic efficiently to ensure that applications are scalable and highly available. This target group is going to be pointing to containers running in the ECS Fargate( hence, target type of IP selected). Note that for now, no target would be registered.
+Next, we create a target group. A target group is used to route requests to one or more registered targets, such as EC2 instances, IP addresses, or Lambda functions. Target groups are essential for managing and distributing incoming traffic efficiently to ensure that applications are scalable and highly available. This target group is going to be pointing to containers running in the ECS Fargate( hence, target type of IP selected).
 
 ![Screenshot (849)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/324550d8-df41-4fa0-8628-9cd7ac947b37)
 
@@ -310,7 +319,7 @@ Next, we setup a Fargate cluster
 Next, we create a task and container definition.
 
 ## Task definition
-A task definition is a blueprint of our application. It is a text file, in JSON format, that describes one or more containers that form your application.
+A task definition is a blueprint of our application. It is a text file, in JSON format, that describes one or more containers that form our application.
 
 ## Task
 A task is the instantiation of a task definition within a cluster. We have the option to specify the number of tasks that will run on your cluster.
@@ -344,7 +353,7 @@ Now, we proceed to the task definition creation:
 
 ![Screenshot (916)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/8ce14df2-f264-40b5-be52-3be0f9492e43)
 
-Note that we can use different task definition revisions to specify different containers in Amazon ECS (Elastic Container Service). Task definitions in ECS are versioned, and each revision can define a different set of container configurations. This allows us to manage changes and updates to your application in a controlled manner.
+Note that we can use different task definition revisions to specify different containers in Amazon ECS (Elastic Container Service). Task definitions in ECS are versioned, and each revision can define a different set of container configurations. This allows us to manage changes and updates to our application in a controlled manner.
 
 Next, we create a service. The service manages the task definitions and ensures the specified number of tasks are running and healthy. The task definition is deployed using a service.
 
@@ -370,7 +379,7 @@ Next, we create a service. The service manages the task definitions and ensures 
 
 ![Screenshot (914)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/9ef05525-9cd6-400f-9cec-2c548fb64050)
 
-With the service deployed successfully and running with the latest version of the container on ECR, we now test the container application by copying the LB DNS name and accessing the application via a web browser
+With the service deployed successfully and running with the latest version of the container on ECR, we now test the container application by copying the Load Balancer's DNS name and accessing the application via a web browser.
 
 ![Screenshot (885)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/d96908c1-f6fd-41d3-a89d-b61c9a03685e)
 
@@ -394,7 +403,7 @@ We then add an action group. For Action Provider, we select Amazon ECS. For Inpu
 
 ![Screenshot (895)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/e0b506dd-ff4c-4563-9380-18055993cc7e)
 
-Now, to test automation of the full deployment pipeline, we edit the Header.js by adding three dots to the end of the `h1` line text and commit the changes
+Now, to test automation of the full deployment pipeline, we edit the Header.js by adding dots to the end of the `h1` line text and commit the changes
 
 ![Screenshot (897)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/95d14f09-fd8e-42c2-964d-a7642009f892)
 
@@ -412,7 +421,7 @@ We then observe the pipeline triggered
 
 ![Screenshot (905)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/31142df0-da51-46f8-a9d6-ec8b78749064)
 
-We can see the task using the new docker image ans the task is registered in the target group.
+We can see the task using the new docker image and the task registered in the target group.
 
 ![Screenshot (906)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/6490cc39-3355-4daf-a969-26d1173853df)
 
@@ -426,7 +435,7 @@ We can as well see the artifacts stored in S3 bucket and the docker image in the
 
 ![Screenshot (919)](https://github.com/kenchuks44/CI-CD-with-AWS-CodePipeline/assets/88329191/ca67db67-a79f-4c75-bb3b-c4d4ed9b01af)
 
-Hence, we have a full automated deployment by CodePipeline.
+We now have a full automated deployment by CodePipeline.
 
 Congratulations!!!
 
